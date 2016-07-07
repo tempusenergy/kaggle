@@ -1,4 +1,4 @@
-# Kaggle Competition - Grup Bimbo Inventory Demand
+# Kaggle Competition - Grupo Bimbo Inventory Demand
 
 ## Description
 This repo contains the analysis and tools required to compete in the Grupo Bimbo Kaggle [competition](https://www.kaggle.com/c/grupo-bimbo-inventory-demand)
