@@ -47,7 +47,7 @@ class GrupoBimboData(object):
 
     def _get_path(self, data_name):
         data_file = data_name + '.csv.zip'
-        return '/'.join([self._data_dir, data_file])
+        return os.path.join(self._data_dir, data_file)
 
     def _load_data(self, data_name, load_args):
         filename = self._get_path(data_name)
