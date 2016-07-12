@@ -1,46 +1,78 @@
+import os
+
 import pandas as pd
 
 
+GRUPO_URL = 'https://www.kaggle.com/c/grupo-bimbo-inventory-demand/download/'
+
+
+class NoFileError(Exception):
+        pass
+
+
 class GrupoBimboData(object):
-    train = None
-    test = None
-    cliente_tabla = None
-    producto_tabla = None
-    town_state = None
-    all_data = [train, test, cliente_tabla, producto_tabla, town_state]
+    """Loads the data for the Kaggle Grupo Bimbo comp.
+    Data file names:
+    - train.csv.zip
+    - test.csv.zip
+    - cliente_tabla.csv.zip
+    - producto_tabla.csv.zip
+    - town_state.csv.zip
+
+    Attributes:
+    - data (dict): dict containing a pandas dataframe corresponding
+                   to each data filename (without file extension)
+    - data_load_args (dict): dict of dicts containing additional args to pass
+                             to pandas read_csv for each data filename
+    """
+
+    data_load_args = {
+        'train': {'nrows': 1000},
+    }
 
     def __init__(self, data_dir):
+        """Args:
+        - data_dir (str): full path to directory containing data files
+        """
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
         self._data_dir = data_dir
+        self.data = {
+            'train': None,
+            'test': None,
+            'cliente_tabla': None,
+            'producto_tabla': None,
+            'town_state': None,
+        }
 
     def _get_path(self, data_name):
-        data_file = data_name + '.csv'
+        data_file = data_name + '.csv.zip'
         return '/'.join([self._data_dir, data_file])
 
-    def _load_train(self, nrows=1000):
-        self.train = pd.read_csv(self._get_path('train'), nrows=nrows)
+    def _load_data(self, data_name, load_args):
+        filename = self._get_path(data_name)
+        if not os.path.isfile(filename):
+            raise NoFileError('{} does not exist'.format(filename))
 
-    def _load_test(self):
-        self.test = pd.read_csv(self._get_path('test'))
+        self.data[data_name] = pd.read_csv(filename, **load_args)
 
-    def _load_cliente_tabla(self):
-        self.cliente_tabla = pd.read_csv(self._get_path('cliente_tabla'))
+    def load_all(self, load_arg_override=None):
+        """Load all the data files into a dict of pandas dataframes.
 
-    def _load_producto_tabla(self):
-        self.producto_tabla = pd.read_csv(self._get_path('producto_tabla'))
+        Note:
+        - Data files should not be unzipped, pandas can handle this.
 
-    def _load_town_state(self):
-        self.town_state = pd.read_csv(self._get_path('town_state'))
+        Args:
+        - load_arg_override (dict): Dict of dicts that overrides
+                                    self.data_load_args (see class docstring)
+                                    e.g. {'train': {'nrows': 2000}}
+        """
+        if load_arg_override:
+            self.data_load_args.update(load_arg_override)
 
-    def load_all(self, num_train_rows=1000):
-        self._load_train(nrows=num_train_rows)
-        self._load_test()
-        self._load_cliente_tabla()
-        self._load_producto_tabla()
-        self._load_town_state()
-        self.all_data = [
-            self.train,
-            self.test,
-            self.cliente_tabla,
-            self.producto_tabla,
-            self.town_state,
-        ]
+        for data_name in self.data:
+            load_args = {}
+            if data_name in self.data_load_args:
+                load_args = self.data_load_args[data_name]
+
+            self._load_data(data_name, load_args)
