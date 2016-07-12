@@ -5,6 +5,7 @@ This repo contains the analysis and tools required to compete in the Grupo Bimbo
 
 ## Installation instructions
 ```python
+pip install -e .
 pip install -r requirements.txt
 ```
 
