@@ -35,9 +35,12 @@ class GrupoBimboData(object):
         self.producto_tabla = None
         self.town_state = None
 
-    def _get_path(self, data_name):
-        data_file = data_name + '.csv.zip'
-        return os.path.join(self._data_dir, data_file)
+    def find_file(self, data_name):
+        for ext in ('.csv.zip', '.csv'):
+            data_file = os.path.join(self._data_dir, data_name + ext)
+            if os.path.isfile(data_file):
+                return data_file
+        raise NoFileError('{} dataset does not exist'.format(data_file))
 
     def load_data(self, data_name, **kwargs):
         """Load the data for a specific data_file into the similiarly named
@@ -47,9 +50,6 @@ class GrupoBimboData(object):
         - data_name (str): name of the data file, without extension ('train')
         - **kwargs : any supported by pandas read_csv
         """
-        filename = self._get_path(data_name)
-        if not os.path.isfile(filename):
-            raise NoFileError('{} dataset does not exist'.format(filename))
-
+        filename = self.find_file(data_name)
         data_frame = pd.read_csv(filename, **kwargs)
         setattr(self, data_name, data_frame)
