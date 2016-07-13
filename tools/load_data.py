@@ -40,6 +40,13 @@ class GrupoBimboData(object):
         return os.path.join(self._data_dir, data_file)
 
     def load_data(self, data_name, **kwargs):
+        """Load the data for a specific data_file into the similiarly named
+        class attribute.
+
+        Args:
+        - data_name (str): name of the data file, without extension ('train')
+        - **kwargs : any supported by pandas read_csv
+        """
         filename = self._get_path(data_name)
         if not os.path.isfile(filename):
             raise NoFileError('{} dataset does not exist'.format(filename))
