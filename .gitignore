@@ -1,0 +1,4 @@
+*.csv
+*.egg-info
+*.ipynb_checkpoints
+*.zip
