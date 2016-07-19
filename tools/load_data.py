@@ -6,7 +6,19 @@ import pandas as pd
 GRUPO_URL = 'https://www.kaggle.com/c/grupo-bimbo-inventory-demand/download/'
 
 
+def check_data(data):
+    if type(data) != pd.DataFrame:
+        return False
+    if len(data) == 0:
+        return False
+    return True
+
+
 class NoFileError(Exception):
+        pass
+
+
+class DataLoadError(Exception):
         pass
 
 
@@ -53,3 +65,23 @@ class GrupoBimboData(object):
         filename = self.find_file(data_name)
         data_frame = pd.read_csv(filename, **kwargs)
         setattr(self, data_name, data_frame)
+
+    def combine_data(self, parent='train', keep_index_cols=True):
+        data = getattr(self, parent)
+        child_table_keys = [
+            ('cliente_tabla', 'Cliente_ID'),
+            ('producto_tabla', 'Producto_ID'),
+            ('town_state', 'Agencia_ID'),
+        ]
+
+        for child, key in child_table_keys:
+            child_df = getattr(self, child)
+            if not check_data(child_df):
+                raise DataLoadError(child + ' data has not been loaded')
+            data = pd.merge(data, child_df, on=key)
+
+        if not keep_index_cols:
+            keys = [child[1] for child in child_table_keys]
+            data = data.drop(keys, axis=1)
+
+        return data
